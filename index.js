@@ -5,6 +5,7 @@ import { FervexStrategy } from "./src/strategies/fervex-strategy";
 import { MagicPillStrategy } from "./src/strategies/magic-pill-strategy";
 
 import fs from "fs";
+import { DafalganStrategy } from "./src/strategies/dafalgan-strategy";
 
 /**
  * @type {Object.<string, import('./src/strategies/abstract-strategy').AbstractStrategy>}
@@ -14,6 +15,7 @@ const STRATEGIES = {
   herbal_tea: new HerbalTeaStrategy(),
   fervex: new FervexStrategy(),
   magic_pill: new MagicPillStrategy(),
+  dafalgan: new DafalganStrategy(),
 };
 
 /**

@@ -1,4 +1,5 @@
 import { Drug, Pharmacy } from "./pharmacy";
+import { DafalganStrategy } from "./src/strategies/dafalgan-strategy";
 import { DefaultStrategy } from "./src/strategies/default-strategy";
 import { FervexStrategy } from "./src/strategies/fervex-strategy";
 import { HerbalTeaStrategy } from "./src/strategies/herbal-tea-strategy";
@@ -81,6 +82,18 @@ describe("Pharmacy", () => {
       description: "Fervex strategy sets benefit to 0 when expiresIn <= 0",
       strategy: new FervexStrategy(),
       drug: new Drug("test", 0, 3),
+      expected: new Drug("test", -1, 0),
+    },
+    {
+      description: "Dafalgan strategy decreases benefit twice as fast as normal drugs",
+      strategy: new DafalganStrategy(),
+      drug: new Drug("test", 1, 4),
+      expected: new Drug("test", 0, 2),
+    },
+    {
+      description: "Dafalgan strategy decreases benefit twice as fast as normal drugs after expiration",
+      strategy: new DafalganStrategy(),
+      drug: new Drug("test", 0, 4),
       expected: new Drug("test", -1, 0),
     },
   ])("$description", ({ strategy, drug, expected }) => {

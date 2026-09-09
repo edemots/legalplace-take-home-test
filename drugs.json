@@ -22,5 +22,11 @@
         "expiresIn": 15,
         "benefit": 40,
         "strategy": "magic_pill"
+    },
+    {
+        "name": "Dafalgan",
+        "expiresIn": 15,
+        "benefit": 40,
+        "strategy": "dafalgan"
     }
 ]
