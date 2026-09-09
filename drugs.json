@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Doliprane",
+        "expiresIn": 20,
+        "benefit": 30,
+        "strategy": "default"
+    },
+    {
+        "name": "Herbal Tea",
+        "expiresIn": 10,
+        "benefit": 5,
+        "strategy": "herbal_tea"
+    },
+    {
+        "name": "Fervex",
+        "expiresIn": 12,
+        "benefit": 35,
+        "strategy": "fervex"
+    },
+    {
+        "name": "Magic Pill",
+        "expiresIn": 15,
+        "benefit": 40,
+        "strategy": "magic_pill"
+    }
+]

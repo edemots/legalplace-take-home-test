@@ -1,59 +1,91 @@
 import { Drug, Pharmacy } from "./pharmacy";
+import { DefaultStrategy } from "./src/strategies/default-strategy";
+import { FervexStrategy } from "./src/strategies/fervex-strategy";
+import { HerbalTeaStrategy } from "./src/strategies/herbal-tea-strategy";
+import { MagicPillStrategy } from "./src/strategies/magic-pill-strategy";
 
 describe("Pharmacy", () => {
-  it("should decrease the benefit and expiresIn", () => {
-    expect(new Pharmacy([new Drug("test", 2, 3)]).updateBenefitValue()).toEqual(
-      [new Drug("test", 1, 2)],
-    );
+  it("should not allow drugs to have negative benefit", () => {
+    const drug = new Drug("test", 1, -1);
+    expect(drug.benefit).toBe(0);
   });
-  it("should decrease the benefit twice as fast when the drug is expired", () => {
-    expect(new Pharmacy([new Drug("test", 0, 3)]).updateBenefitValue()).toEqual(
-      [new Drug("test", -1, 1)],
-    );
+
+  it("should not allow drugs to have a benefit above 50", () => {
+    const drug = new Drug("test", 1, 51);
+    console.log(drug);
+
+    expect(drug.benefit).toBe(50);
   });
-  it("should not decrease the benefit below 0", () => {
-    expect(new Pharmacy([new Drug("test", 2, 0)]).updateBenefitValue()).toEqual(
-      [new Drug("test", 1, 0)],
-    );
-  });
-  it("should not increase the benefit above 50", () => {
+
+  it.each([
+    {
+      description: "Default strategy decreases both expiresIn and benefit by 1",
+      strategy: new DefaultStrategy(),
+      drug: new Drug("test", 2, 3),
+      expected: new Drug("test", 1, 2),
+    },
+    {
+      description:
+        "Default strategy decreases benefit by 2 when expiresIn is < 0",
+      strategy: new DefaultStrategy(),
+      drug: new Drug("test", 0, 3),
+      expected: new Drug("test", -1, 1),
+    },
+    {
+      description: "Default strategy does not decrease benefit below 0",
+      strategy: new DefaultStrategy(),
+      drug: new Drug("test", 0, 0),
+      expected: new Drug("test", -1, 0),
+    },
+    {
+      description: "Herbal Tea strategy increases benefit by 1",
+      strategy: new HerbalTeaStrategy(),
+      drug: new Drug("test", 1, 3),
+      expected: new Drug("test", 0, 4),
+    },
+    {
+      description:
+        "Herbal Tea strategy increases benefit by 2 when expiresIn < 0",
+      strategy: new HerbalTeaStrategy(),
+      drug: new Drug("test", 0, 3),
+      expected: new Drug("test", -1, 5),
+    },
+    {
+      description: "Magic Pill strategy does not change benefit or expiresIn",
+      strategy: new MagicPillStrategy(),
+      drug: new Drug("test", 0, 3),
+      expected: new Drug("test", 0, 3),
+    },
+    {
+      description:
+        "Fervex strategy increases benefit by 1 when expiresIn is > 10",
+      strategy: new FervexStrategy(),
+      drug: new Drug("test", 11, 3),
+      expected: new Drug("test", 10, 4),
+    },
+    {
+      description:
+        "Fervex strategy increases benefit by 2 when 5 < expiresIn <= 10",
+      strategy: new FervexStrategy(),
+      drug: new Drug("test", 7, 3),
+      expected: new Drug("test", 6, 5),
+    },
+    {
+      description:
+        "Fervex strategy increases benefit by 3 when 0 < expiresIn <= 5",
+      strategy: new FervexStrategy(),
+      drug: new Drug("test", 3, 3),
+      expected: new Drug("test", 2, 6),
+    },
+    {
+      description: "Fervex strategy sets benefit to 0 when expiresIn <= 0",
+      strategy: new FervexStrategy(),
+      drug: new Drug("test", 0, 3),
+      expected: new Drug("test", -1, 0),
+    },
+  ])("$description", ({ strategy, drug, expected }) => {
     expect(
-      new Pharmacy([new Drug("Herbal Tea", 2, 50)]).updateBenefitValue(),
-    ).toEqual([new Drug("Herbal Tea", 1, 50)]);
-  });
-  test("Herbal Tea benefit increases over time", () => {
-    expect(
-      new Pharmacy([new Drug("Herbal Tea", 2, 30)]).updateBenefitValue(),
-    ).toEqual([new Drug("Herbal Tea", 1, 31)]);
-  });
-  test("Herbal Tea benefit increases twice as fast after expiration", () => {
-    expect(
-      new Pharmacy([new Drug("Herbal Tea", 0, 30)]).updateBenefitValue(),
-    ).toEqual([new Drug("Herbal Tea", -1, 32)]);
-  });
-  test("Magic Pill never expires nor decreases in benefit", () => {
-    expect(
-      new Pharmacy([new Drug("Magic Pill", 0, 30)]).updateBenefitValue(),
-    ).toEqual([new Drug("Magic Pill", 0, 30)]);
-  });
-  test("Fervex benefit increases when there are more than 10 days before expiration", () => {
-    expect(
-      new Pharmacy([new Drug("Fervex", 15, 30)]).updateBenefitValue(),
-    ).toEqual([new Drug("Fervex", 14, 31)]);
-  });
-  test("Fervex benefit increases by 2 when there are 10 days or less", () => {
-    expect(
-      new Pharmacy([new Drug("Fervex", 10, 30)]).updateBenefitValue(),
-    ).toEqual([new Drug("Fervex", 9, 32)]);
-  });
-  test("Fervex benefit increases by 3 when there are 5 days or less", () => {
-    expect(
-      new Pharmacy([new Drug("Fervex", 5, 30)]).updateBenefitValue(),
-    ).toEqual([new Drug("Fervex", 4, 33)]);
-  });
-  test("Fervex benefit drops to 0 after expiration", () => {
-    expect(
-      new Pharmacy([new Drug("Fervex", 0, 30)]).updateBenefitValue(),
-    ).toEqual([new Drug("Fervex", -1, 0)]);
+      new Pharmacy([drug.setStrategy(strategy)]).updateBenefitValue(),
+    ).toEqual([expected]);
   });
 });

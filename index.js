@@ -1,13 +1,38 @@
 import { Drug, Pharmacy } from "./pharmacy";
+import { DefaultStrategy } from "./src/strategies/default-strategy";
+import { HerbalTeaStrategy } from "./src/strategies/herbal-tea-strategy";
+import { FervexStrategy } from "./src/strategies/fervex-strategy";
+import { MagicPillStrategy } from "./src/strategies/magic-pill-strategy";
 
 import fs from "fs";
 
-const drugs = [
-  new Drug("Doliprane", 20, 30),
-  new Drug("Herbal Tea", 10, 5),
-  new Drug("Fervex", 12, 35),
-  new Drug("Magic Pill", 15, 40),
-];
+/**
+ * @type {Object.<string, import('./src/strategies/abstract-strategy').AbstractStrategy>}
+ */
+const STRATEGIES = {
+  default: new DefaultStrategy(),
+  herbal_tea: new HerbalTeaStrategy(),
+  fervex: new FervexStrategy(),
+  magic_pill: new MagicPillStrategy(),
+};
+
+/**
+ * @typedef DrugConfig
+ * @property {string} name
+ * @property {number} expiresIn
+ * @property {number} benefit
+ * @property {keyof typeof STRATEGIES} strategy
+ */
+
+/** @type {DrugConfig[]} */
+const drugsConfig = JSON.parse(fs.readFileSync("./drugs.json", "utf-8"));
+
+const drugs = drugsConfig.map((drug) =>
+  new Drug(drug.name, drug.expiresIn, drug.benefit).setStrategy(
+    STRATEGIES[drug.strategy] || STRATEGIES.default,
+  ),
+);
+
 const pharmacy = new Pharmacy(drugs);
 
 const log = [];
